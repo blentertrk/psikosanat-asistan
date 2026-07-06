@@ -249,9 +249,13 @@
         <div class="fld"><label>Devirde bildirim gidecek numara</label>
           <input type="text" value="+90 5XX XXX XX XX (Eray Bey'in numarası)">
           <div class="hint">YZ devrettiğinde bu numaraya WhatsApp bildirimi düşer.</div></div>
-        <div class="fld"><label>Serbest kurallar (her satır bir kural)</label>
-          <textarea placeholder="Örn: ...">IBAN'ı yalnızca kayıt olmak istediğini net söyleyen kişiye ver; fiyat soran herkese ilk mesajda IBAN atma.
-Dekont gelince teşekkür et, kimlik no + açık adres + online/yüz yüze tercihini iste, ardından "kaydınız tamamlandı, WhatsApp grubuna ekleneceksiniz" bilgisi ver.</textarea></div>
+        <div class="fld"><label>Serbest kurallar</label>
+          <div class="hint" style="margin-bottom:8px">Kendi cümlelerinle yazdığın özel kurallar — asistan bunlara da aynen uyar.</div>
+          <div id="freeList">
+            <div class="kb-item"><div class="a">IBAN'ı yalnızca kayıt olmak istediğini net söyleyen kişiye ver; fiyat soran herkese ilk mesajda IBAN atma.</div><button class="del" onclick="this.parentElement.remove()">Sil</button></div>
+            <div class="kb-item"><div class="a">Dekont gelince teşekkür et, kimlik no + açık adres + online/yüz yüze tercihini iste, ardından "kaydınız tamamlandı, WhatsApp grubuna ekleneceksiniz" bilgisi ver.</div><button class="del" onclick="this.parentElement.remove()">Sil</button></div>
+          </div>
+          <button class="add-btn" onclick="addFree()">+ Yeni serbest kural ekle</button></div>
       </div>
 
       <!-- BİLGİ TABANI -->
@@ -522,6 +526,13 @@ function addRule(listId){
   l.innerHTML = `<input type="checkbox" checked> <span class="rtext"></span><button class="rm" onclick="rmRule(event,this)" title="Kuralı sil">🗑</button>`;
   l.querySelector(".rtext").textContent = txt;
   document.getElementById(listId).appendChild(l);
+}
+function addFree(){
+  const txt = prompt("Yeni serbest kural yaz (asistanın uyacağı cümle):"); if(!txt) return;
+  const d = document.createElement("div"); d.className = "kb-item";
+  d.innerHTML = `<div class="a"></div><button class="del" onclick="this.parentElement.remove()">Sil</button>`;
+  d.querySelector(".a").textContent = txt;
+  document.getElementById("freeList").appendChild(d);
 }
 function addKb(){
   const q = prompt("Soru (müşteri ne soruyor?)"); if(!q) return;
