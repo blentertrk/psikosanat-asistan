@@ -96,6 +96,9 @@
   .check{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;cursor:pointer;font-size:13.5px;line-height:1.4}
   .check:hover{background:#fafafa}
   .check input{margin-top:2px;accent-color:var(--green)}
+  .check .rtext{flex:1}
+  .check .rm{background:none;border:none;color:#c0392b;cursor:pointer;font-size:15px;line-height:1;padding:0 2px;flex-shrink:0}
+  .check .rm:hover{transform:scale(1.2)}
   .mode-row{display:flex;gap:0;border:1.5px solid var(--green);border-radius:8px;overflow:hidden;margin-bottom:20px}
   .mode-row button{flex:1;border:none;background:#fff;padding:10px;font-size:13px;font-weight:600;cursor:pointer;color:var(--green-dark)}
   .mode-row button.on{background:var(--green);color:#fff}
@@ -225,16 +228,23 @@
       <!-- KURALLAR -->
       <div class="pane" id="p2">
         <div class="fld"><label>Kırmızı çizgiler</label>
-          <label class="check"><input type="checkbox" checked> ASLA terapi, teşhis veya psikolojik tavsiye verme — "bu Eray Bey'in alanı" de, görüşme öner</label>
-          <label class="check"><input type="checkbox" checked> Kriz sinyali (kendine zarar, akut bunalım) → derhal Eray Bey'e devret + ACİL bildirim</label>
-          <label class="check"><input type="checkbox" checked> İndirim pazarlığı yapma — %50 kampanya ve 24 saat koşulunu açıkla</label>
-          <label class="check"><input type="checkbox" checked> İade/ücret istisna kararı verme — kuralı hatırlat, kararı Eray Bey'e bırak</label>
-          <label class="check"><input type="checkbox" checked> Danışan mahremiyeti: kimseye başka katılımcının bilgisini verme</label>
+          <div class="hint" style="margin-bottom:8px">Tik: kural aktif/pasif · 🗑 : kuralı tamamen sil · İstediğin kadar yeni kural ekleyebilirsin.</div>
+          <div id="redList">
+          <label class="check"><input type="checkbox" checked> <span class="rtext">ASLA terapi, teşhis veya psikolojik tavsiye verme — "bu Eray Bey'in alanı" de, görüşme öner</span><button class="rm" onclick="rmRule(event,this)" title="Kuralı sil">🗑</button></label>
+          <label class="check"><input type="checkbox" checked> <span class="rtext">Kriz sinyali (kendine zarar, akut bunalım) → derhal Eray Bey'e devret + ACİL bildirim</span><button class="rm" onclick="rmRule(event,this)" title="Kuralı sil">🗑</button></label>
+          <label class="check"><input type="checkbox" checked> <span class="rtext">İndirim pazarlığı yapma — %50 kampanya ve 24 saat koşulunu açıkla</span><button class="rm" onclick="rmRule(event,this)" title="Kuralı sil">🗑</button></label>
+          <label class="check"><input type="checkbox" checked> <span class="rtext">İade/ücret istisna kararı verme — kuralı hatırlat, kararı Eray Bey'e bırak</span><button class="rm" onclick="rmRule(event,this)" title="Kuralı sil">🗑</button></label>
+          <label class="check"><input type="checkbox" checked> <span class="rtext">Danışan mahremiyeti: kimseye başka katılımcının bilgisini verme</span><button class="rm" onclick="rmRule(event,this)" title="Kuralı sil">🗑</button></label>
+          </div>
+          <button class="add-btn" onclick="addRule('redList')">+ Yeni kural ekle</button>
         </div>
         <div class="fld"><label>İnsana devretme koşulları</label>
-          <label class="check"><input type="checkbox" checked> Kişi "Eray Bey'le görüşmek istiyorum" derse</label>
-          <label class="check"><input type="checkbox" checked> Aynı soru 2 kez cevaplanamadıysa</label>
-          <label class="check"><input type="checkbox" checked> İade / ücret istisnası / kişisel travma anlatımı derinleşirse</label>
+          <div id="handList">
+          <label class="check"><input type="checkbox" checked> <span class="rtext">Kişi "Eray Bey'le görüşmek istiyorum" derse</span><button class="rm" onclick="rmRule(event,this)" title="Koşulu sil">🗑</button></label>
+          <label class="check"><input type="checkbox" checked> <span class="rtext">Aynı soru 2 kez cevaplanamadıysa</span><button class="rm" onclick="rmRule(event,this)" title="Koşulu sil">🗑</button></label>
+          <label class="check"><input type="checkbox" checked> <span class="rtext">İade / ücret istisnası / kişisel travma anlatımı derinleşirse</span><button class="rm" onclick="rmRule(event,this)" title="Koşulu sil">🗑</button></label>
+          </div>
+          <button class="add-btn" onclick="addRule('handList')">+ Yeni koşul ekle</button>
         </div>
         <div class="fld"><label>Devirde bildirim gidecek numara</label>
           <input type="text" value="+90 5XX XXX XX XX (Eray Bey'in numarası)">
@@ -501,6 +511,17 @@ GÖREVLERİN: Kamp/eğitim sorularını bilgi tabanından cevapla. Kayıt sürec
 
 SINIRLAR: Kurallar sekmesindeki kırmızı çizgilere kesin uy. ASLA terapi/teşhis/psikolojik tavsiye verme — "bu Eray Bey'in alanı" de, görüşme öner. Kriz sinyalinde derhal insana devret. Bilmediğin konuda uydurma — "netleştirip döneceğiz" de. Kendini ilk mesajda yapay zekâ olarak tanıt.`;
   document.getElementById("promptPrev").textContent = p;
+}
+function rmRule(ev,btn){
+  ev.preventDefault(); ev.stopPropagation();
+  if(confirm("Bu kural tamamen silinsin mi? (Geçici kapatmak için tikini kaldırman yeterli)")) btn.closest(".check").remove();
+}
+function addRule(listId){
+  const txt = prompt("Yeni kural yaz (asistanın uyacağı cümle):"); if(!txt) return;
+  const l = document.createElement("label"); l.className = "check";
+  l.innerHTML = `<input type="checkbox" checked> <span class="rtext"></span><button class="rm" onclick="rmRule(event,this)" title="Kuralı sil">🗑</button>`;
+  l.querySelector(".rtext").textContent = txt;
+  document.getElementById(listId).appendChild(l);
 }
 function addKb(){
   const q = prompt("Soru (müşteri ne soruyor?)"); if(!q) return;
