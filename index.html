@@ -107,6 +107,10 @@
   .kb-item .q{font-weight:600;font-size:13.5px}
   .kb-item .a{font-size:13px;color:#3b4a54}
   .kb-item .del{align-self:flex-end;background:none;border:none;color:#c0392b;font-size:12px;cursor:pointer}
+  .kbact{display:flex;gap:16px;align-self:flex-end}
+  .kbact .del{align-self:auto}
+  .kbact .edit{background:none;border:none;color:var(--green-dark);font-size:12px;cursor:pointer;font-weight:600}
+  .check .rm.ed{color:var(--green-dark);font-size:13px}
   .add-btn{width:100%;border:1.5px dashed var(--green);background:#f2fbf8;color:var(--green-dark);border-radius:8px;padding:10px;font-size:13px;font-weight:600;cursor:pointer}
   .save-bar{padding:14px 20px;border-top:1px solid var(--border);background:#fff;display:flex;gap:10px;align-items:center}
   .save-bar .save{flex:1;background:var(--green);border:none;color:#fff;border-radius:8px;padding:12px;font-size:14px;font-weight:700;cursor:pointer}
@@ -230,19 +234,19 @@
         <div class="fld"><label>Kırmızı çizgiler</label>
           <div class="hint" style="margin-bottom:8px">Tik: kural aktif/pasif · 🗑 : kuralı tamamen sil · İstediğin kadar yeni kural ekleyebilirsin.</div>
           <div id="redList">
-          <label class="check"><input type="checkbox" checked> <span class="rtext">ASLA terapi, teşhis veya psikolojik tavsiye verme — "bu Eray Bey'in alanı" de, görüşme öner</span><button class="rm" onclick="rmRule(event,this)" title="Kuralı sil">🗑</button></label>
-          <label class="check"><input type="checkbox" checked> <span class="rtext">Kriz sinyali (kendine zarar, akut bunalım) → derhal Eray Bey'e devret + ACİL bildirim</span><button class="rm" onclick="rmRule(event,this)" title="Kuralı sil">🗑</button></label>
-          <label class="check"><input type="checkbox" checked> <span class="rtext">İndirim pazarlığı yapma — %50 kampanya ve 24 saat koşulunu açıkla</span><button class="rm" onclick="rmRule(event,this)" title="Kuralı sil">🗑</button></label>
-          <label class="check"><input type="checkbox" checked> <span class="rtext">İade/ücret istisna kararı verme — kuralı hatırlat, kararı Eray Bey'e bırak</span><button class="rm" onclick="rmRule(event,this)" title="Kuralı sil">🗑</button></label>
-          <label class="check"><input type="checkbox" checked> <span class="rtext">Danışan mahremiyeti: kimseye başka katılımcının bilgisini verme</span><button class="rm" onclick="rmRule(event,this)" title="Kuralı sil">🗑</button></label>
+          <label class="check"><input type="checkbox" checked> <span class="rtext">ASLA terapi, teşhis veya psikolojik tavsiye verme — "bu Eray Bey'in alanı" de, görüşme öner</span><button class="rm ed" onclick="editRule(event,this)" title="Düzenle">✎</button><button class="rm" onclick="rmRule(event,this)" title="Kuralı sil">🗑</button></label>
+          <label class="check"><input type="checkbox" checked> <span class="rtext">Kriz sinyali (kendine zarar, akut bunalım) → derhal Eray Bey'e devret + ACİL bildirim</span><button class="rm ed" onclick="editRule(event,this)" title="Düzenle">✎</button><button class="rm" onclick="rmRule(event,this)" title="Kuralı sil">🗑</button></label>
+          <label class="check"><input type="checkbox" checked> <span class="rtext">İndirim pazarlığı yapma — %50 kampanya ve 24 saat koşulunu açıkla</span><button class="rm ed" onclick="editRule(event,this)" title="Düzenle">✎</button><button class="rm" onclick="rmRule(event,this)" title="Kuralı sil">🗑</button></label>
+          <label class="check"><input type="checkbox" checked> <span class="rtext">İade/ücret istisna kararı verme — kuralı hatırlat, kararı Eray Bey'e bırak</span><button class="rm ed" onclick="editRule(event,this)" title="Düzenle">✎</button><button class="rm" onclick="rmRule(event,this)" title="Kuralı sil">🗑</button></label>
+          <label class="check"><input type="checkbox" checked> <span class="rtext">Danışan mahremiyeti: kimseye başka katılımcının bilgisini verme</span><button class="rm ed" onclick="editRule(event,this)" title="Düzenle">✎</button><button class="rm" onclick="rmRule(event,this)" title="Kuralı sil">🗑</button></label>
           </div>
           <button class="add-btn" onclick="addRule('redList')">+ Yeni kural ekle</button>
         </div>
         <div class="fld"><label>İnsana devretme koşulları</label>
           <div id="handList">
-          <label class="check"><input type="checkbox" checked> <span class="rtext">Kişi "Eray Bey'le görüşmek istiyorum" derse</span><button class="rm" onclick="rmRule(event,this)" title="Koşulu sil">🗑</button></label>
-          <label class="check"><input type="checkbox" checked> <span class="rtext">Aynı soru 2 kez cevaplanamadıysa</span><button class="rm" onclick="rmRule(event,this)" title="Koşulu sil">🗑</button></label>
-          <label class="check"><input type="checkbox" checked> <span class="rtext">İade / ücret istisnası / kişisel travma anlatımı derinleşirse</span><button class="rm" onclick="rmRule(event,this)" title="Koşulu sil">🗑</button></label>
+          <label class="check"><input type="checkbox" checked> <span class="rtext">Kişi "Eray Bey'le görüşmek istiyorum" derse</span><button class="rm ed" onclick="editRule(event,this)" title="Düzenle">✎</button><button class="rm" onclick="rmRule(event,this)" title="Koşulu sil">🗑</button></label>
+          <label class="check"><input type="checkbox" checked> <span class="rtext">Aynı soru 2 kez cevaplanamadıysa</span><button class="rm ed" onclick="editRule(event,this)" title="Düzenle">✎</button><button class="rm" onclick="rmRule(event,this)" title="Koşulu sil">🗑</button></label>
+          <label class="check"><input type="checkbox" checked> <span class="rtext">İade / ücret istisnası / kişisel travma anlatımı derinleşirse</span><button class="rm ed" onclick="editRule(event,this)" title="Düzenle">✎</button><button class="rm" onclick="rmRule(event,this)" title="Koşulu sil">🗑</button></label>
           </div>
           <button class="add-btn" onclick="addRule('handList')">+ Yeni koşul ekle</button>
         </div>
@@ -252,8 +256,8 @@
         <div class="fld"><label>Serbest kurallar</label>
           <div class="hint" style="margin-bottom:8px">Kendi cümlelerinle yazdığın özel kurallar — asistan bunlara da aynen uyar.</div>
           <div id="freeList">
-            <div class="kb-item"><div class="a">IBAN'ı yalnızca kayıt olmak istediğini net söyleyen kişiye ver; fiyat soran herkese ilk mesajda IBAN atma.</div><button class="del" onclick="this.parentElement.remove()">Sil</button></div>
-            <div class="kb-item"><div class="a">Dekont gelince teşekkür et, kimlik no + açık adres + online/yüz yüze tercihini iste, ardından "kaydınız tamamlandı, WhatsApp grubuna ekleneceksiniz" bilgisi ver.</div><button class="del" onclick="this.parentElement.remove()">Sil</button></div>
+            <div class="kb-item"><div class="a">IBAN'ı yalnızca kayıt olmak istediğini net söyleyen kişiye ver; fiyat soran herkese ilk mesajda IBAN atma.</div><div class="kbact"><button class="edit" onclick="editKb(this)">✎ Düzenle</button><button class="del" onclick="this.closest('.kb-item').remove()">Sil</button></div></div>
+            <div class="kb-item"><div class="a">Dekont gelince teşekkür et, kimlik no + açık adres + online/yüz yüze tercihini iste, ardından "kaydınız tamamlandı, WhatsApp grubuna ekleneceksiniz" bilgisi ver.</div><div class="kbact"><button class="edit" onclick="editKb(this)">✎ Düzenle</button><button class="del" onclick="this.closest('.kb-item').remove()">Sil</button></div></div>
           </div>
           <button class="add-btn" onclick="addFree()">+ Yeni serbest kural ekle</button></div>
       </div>
@@ -262,13 +266,13 @@
       <div class="pane" id="p3">
         <div class="hint" style="margin-bottom:14px">Asistanın ezbere bileceği bilgiler. Soru-cevap olarak ekle; asistan bunları kendi cümleleriyle kullanır.</div>
         <div id="kbList">
-          <div class="kb-item"><div class="q">Kamp ne zaman ve nerede?</div><div class="a">10-11-12 Temmuz (Cuma–Pazar), Yalova / Çınarcık / Esenköy. Gelemeyenler eğitim oturumlarına Zoom'dan canlı katılabilir.</div><button class="del" onclick="this.parentElement.remove()">Sil</button></div>
-          <div class="kb-item"><div class="q">Ücret ne kadar?</div><div class="a">Kamp + eğitim + etkinlik: 28.000 TL yerine %50 indirimle 13.950 TL. İndirim için başvurudan itibaren 24 saat içinde kayıt tamamlanmalı. Başlangıca 7 gün ve daha az kala iade yapılmaz.</div><button class="del" onclick="this.parentElement.remove()">Sil</button></div>
-          <div class="kb-item"><div class="q">Kayıt nasıl yapılır?</div><div class="a">Ödeme: Eray Hacıosmanoğlu — Garanti — TR65 0006 2000 5310 0006 6967 83, açıklama "Konaklama - Ad Soyad". Sonra dekont + kimlik no + açık adres + online/yüz yüze tercihi WhatsApp'tan iletilir. Kayıt olan, geçici WhatsApp grubuna eklenir.</div><button class="del" onclick="this.parentElement.remove()">Sil</button></div>
-          <div class="kb-item"><div class="q">Konaklama nasıl?</div><div class="a">Deniz manzaralı, çevresi kapalı özel bahçede kişiye özel Decathlon 3 kişilik geniş çadır. Şişme yatak, mat, uyku tulumu, yastık, çadır lambası hazır.</div><button class="del" onclick="this.parentElement.remove()">Sil</button></div>
-          <div class="kb-item"><div class="q">Yemekler dahil mi?</div><div class="a">Kahvaltı ve gün içi ikramlar bizden. Öğle/akşam yemekleri kampa 3 dk mesafedeki Esenköy Limanı'nda uygun fiyatlı restoranlarda yenir.</div><button class="del" onclick="this.parentElement.remove()">Sil</button></div>
-          <div class="kb-item"><div class="q">Nasıl ulaşırım?</div><div class="a">İstanbul'dan ~1,5 saat. İDO ve Turyol'un Esenköy seferleri var; Yalova Otogarı'ndan Esenköy minibüsüyle ~30 dk. Detaylı konum kayıt sonrası grupta paylaşılır.</div><button class="del" onclick="this.parentElement.remove()">Sil</button></div>
-          <div class="kb-item"><div class="q">Kendi hikâyemle bireysel çalışma yapılır mı?</div><div class="a">Pazar uygulamalarında herkes gözlemci/temsilci olabilir. Bireysel travma çalışması ise önceden başvuran danışanlardan seçilir — kendi hikâyen için AYRICA kayıt gerekir.</div><button class="del" onclick="this.parentElement.remove()">Sil</button></div>
+          <div class="kb-item"><div class="q">Kamp ne zaman ve nerede?</div><div class="a">10-11-12 Temmuz (Cuma–Pazar), Yalova / Çınarcık / Esenköy. Gelemeyenler eğitim oturumlarına Zoom'dan canlı katılabilir.</div><div class="kbact"><button class="edit" onclick="editKb(this)">✎ Düzenle</button><button class="del" onclick="this.closest('.kb-item').remove()">Sil</button></div></div>
+          <div class="kb-item"><div class="q">Ücret ne kadar?</div><div class="a">Kamp + eğitim + etkinlik: 28.000 TL yerine %50 indirimle 13.950 TL. İndirim için başvurudan itibaren 24 saat içinde kayıt tamamlanmalı. Başlangıca 7 gün ve daha az kala iade yapılmaz.</div><div class="kbact"><button class="edit" onclick="editKb(this)">✎ Düzenle</button><button class="del" onclick="this.closest('.kb-item').remove()">Sil</button></div></div>
+          <div class="kb-item"><div class="q">Kayıt nasıl yapılır?</div><div class="a">Ödeme: Eray Hacıosmanoğlu — Garanti — TR65 0006 2000 5310 0006 6967 83, açıklama "Konaklama - Ad Soyad". Sonra dekont + kimlik no + açık adres + online/yüz yüze tercihi WhatsApp'tan iletilir. Kayıt olan, geçici WhatsApp grubuna eklenir.</div><div class="kbact"><button class="edit" onclick="editKb(this)">✎ Düzenle</button><button class="del" onclick="this.closest('.kb-item').remove()">Sil</button></div></div>
+          <div class="kb-item"><div class="q">Konaklama nasıl?</div><div class="a">Deniz manzaralı, çevresi kapalı özel bahçede kişiye özel Decathlon 3 kişilik geniş çadır. Şişme yatak, mat, uyku tulumu, yastık, çadır lambası hazır.</div><div class="kbact"><button class="edit" onclick="editKb(this)">✎ Düzenle</button><button class="del" onclick="this.closest('.kb-item').remove()">Sil</button></div></div>
+          <div class="kb-item"><div class="q">Yemekler dahil mi?</div><div class="a">Kahvaltı ve gün içi ikramlar bizden. Öğle/akşam yemekleri kampa 3 dk mesafedeki Esenköy Limanı'nda uygun fiyatlı restoranlarda yenir.</div><div class="kbact"><button class="edit" onclick="editKb(this)">✎ Düzenle</button><button class="del" onclick="this.closest('.kb-item').remove()">Sil</button></div></div>
+          <div class="kb-item"><div class="q">Nasıl ulaşırım?</div><div class="a">İstanbul'dan ~1,5 saat. İDO ve Turyol'un Esenköy seferleri var; Yalova Otogarı'ndan Esenköy minibüsüyle ~30 dk. Detaylı konum kayıt sonrası grupta paylaşılır.</div><div class="kbact"><button class="edit" onclick="editKb(this)">✎ Düzenle</button><button class="del" onclick="this.closest('.kb-item').remove()">Sil</button></div></div>
+          <div class="kb-item"><div class="q">Kendi hikâyemle bireysel çalışma yapılır mı?</div><div class="a">Pazar uygulamalarında herkes gözlemci/temsilci olabilir. Bireysel travma çalışması ise önceden başvuran danışanlardan seçilir — kendi hikâyen için AYRICA kayıt gerekir.</div><div class="kbact"><button class="edit" onclick="editKb(this)">✎ Düzenle</button><button class="del" onclick="this.closest('.kb-item').remove()">Sil</button></div></div>
         </div>
         <button class="add-btn" onclick="addKb()">+ Yeni bilgi ekle</button>
       </div>
@@ -516,6 +520,19 @@ GÖREVLERİN: Kamp/eğitim sorularını bilgi tabanından cevapla. Kayıt sürec
 SINIRLAR: Kurallar sekmesindeki kırmızı çizgilere kesin uy. ASLA terapi/teşhis/psikolojik tavsiye verme — "bu Eray Bey'in alanı" de, görüşme öner. Kriz sinyalinde derhal insana devret. Bilmediğin konuda uydurma — "netleştirip döneceğiz" de. Kendini ilk mesajda yapay zekâ olarak tanıt.`;
   document.getElementById("promptPrev").textContent = p;
 }
+function editKb(btn){
+  const item = btn.closest(".kb-item");
+  const q = item.querySelector(".q"), a = item.querySelector(".a");
+  if(q){ const nq = prompt("Soruyu düzenle:", q.textContent); if(nq===null) return; if(nq.trim()) q.textContent = nq.trim(); }
+  const na = prompt(q ? "Cevabı düzenle:" : "Kuralı düzenle:", a.textContent);
+  if(na!==null && na.trim()) a.textContent = na.trim();
+}
+function editRule(ev,btn){
+  ev.preventDefault(); ev.stopPropagation();
+  const span = btn.closest(".check").querySelector(".rtext");
+  const t = prompt("Kuralı düzenle:", span.textContent.trim());
+  if(t!==null && t.trim()) span.textContent = t.trim();
+}
 function rmRule(ev,btn){
   ev.preventDefault(); ev.stopPropagation();
   if(confirm("Bu kural tamamen silinsin mi? (Geçici kapatmak için tikini kaldırman yeterli)")) btn.closest(".check").remove();
@@ -523,14 +540,14 @@ function rmRule(ev,btn){
 function addRule(listId){
   const txt = prompt("Yeni kural yaz (asistanın uyacağı cümle):"); if(!txt) return;
   const l = document.createElement("label"); l.className = "check";
-  l.innerHTML = `<input type="checkbox" checked> <span class="rtext"></span><button class="rm" onclick="rmRule(event,this)" title="Kuralı sil">🗑</button>`;
+  l.innerHTML = `<input type="checkbox" checked> <span class="rtext"></span><button class="rm ed" onclick="editRule(event,this)" title="Düzenle">✎</button><button class="rm" onclick="rmRule(event,this)" title="Kuralı sil">🗑</button>`;
   l.querySelector(".rtext").textContent = txt;
   document.getElementById(listId).appendChild(l);
 }
 function addFree(){
   const txt = prompt("Yeni serbest kural yaz (asistanın uyacağı cümle):"); if(!txt) return;
   const d = document.createElement("div"); d.className = "kb-item";
-  d.innerHTML = `<div class="a"></div><button class="del" onclick="this.parentElement.remove()">Sil</button>`;
+  d.innerHTML = `<div class="a"></div><div class="kbact"><button class="edit" onclick="editKb(this)">✎ Düzenle</button><button class="del" onclick="this.closest('.kb-item').remove()">Sil</button></div>`;
   d.querySelector(".a").textContent = txt;
   document.getElementById("freeList").appendChild(d);
 }
@@ -538,7 +555,7 @@ function addKb(){
   const q = prompt("Soru (müşteri ne soruyor?)"); if(!q) return;
   const a = prompt("Cevap (asistan ne bilsin?)"); if(!a) return;
   const d = document.createElement("div"); d.className="kb-item";
-  d.innerHTML = `<div class="q">${q}</div><div class="a">${a}</div><button class="del" onclick="this.parentElement.remove()">Sil</button>`;
+  d.innerHTML = `<div class="q">${q}</div><div class="a">${a}</div><div class="kbact"><button class="edit" onclick="editKb(this)">✎ Düzenle</button><button class="del" onclick="this.closest('.kb-item').remove()">Sil</button></div>`;
   document.getElementById("kbList").appendChild(d);
 }
 function saveCfg(){
