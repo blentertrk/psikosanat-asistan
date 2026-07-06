@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Psikosanat WhatsApp YZ Asistanı — Prototip</title>
+<style>
+  :root{
+    --green:#00a884; --green-dark:#008069; --panel:#f0f2f5; --border:#e9edef;
+    --chatbg:#efeae2; --out:#d9fdd3; --text:#111b21; --muted:#667781;
+    --amber:#fff3cd; --amber-b:#ffe69c;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI",Helvetica,Arial,sans-serif}
+  body{background:#dadbd3;color:var(--text);height:100vh;overflow:hidden}
+  .app{display:flex;height:100vh;max-width:1700px;margin:0 auto;background:#fff;box-shadow:0 1px 8px rgba(0,0,0,.15)}
+
+  /* ---------- SOL: sohbet listesi ---------- */
+  .sidebar{width:380px;min-width:320px;border-right:1px solid var(--border);display:flex;flex-direction:column;background:#fff}
+  .sb-head{background:var(--panel);padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+  .sb-head .me{display:flex;align-items:center;gap:10px;font-weight:600}
+  .avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#00a884,#25d366);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
+  .btn-ai{background:var(--green);color:#fff;border:none;border-radius:20px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px}
+  .btn-ai:hover{background:var(--green-dark)}
+  .search{padding:8px 12px;border-bottom:1px solid var(--border)}
+  .search input{width:100%;border:none;background:var(--panel);border-radius:8px;padding:9px 14px;font-size:14px;outline:none}
+  .chats{flex:1;overflow-y:auto}
+  .chat-item{display:flex;gap:12px;padding:12px 16px;cursor:pointer;border-bottom:1px solid #f5f6f6}
+  .chat-item:hover{background:#f5f6f6}
+  .chat-item.active{background:var(--panel)}
+  .chat-item .info{flex:1;min-width:0}
+  .chat-item .row1{display:flex;justify-content:space-between;align-items:baseline}
+  .chat-item .name{font-weight:600;font-size:15px}
+  .chat-item .time{font-size:12px;color:var(--muted)}
+  .chat-item .row2{display:flex;justify-content:space-between;align-items:center;margin-top:3px}
+  .chat-item .preview{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+  .tag{font-size:10px;font-weight:700;border-radius:10px;padding:2px 8px;margin-left:6px;flex-shrink:0}
+  .tag.ai{background:#d1f4e6;color:#008069}
+  .tag.human{background:#e7e9ec;color:#54656f}
+  .tag.wait{background:var(--amber);color:#8a6d00;border:1px solid var(--amber-b)}
+
+  /* ---------- ORTA: sohbet ---------- */
+  .main{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--chatbg)}
+  .main-head{background:var(--panel);padding:10px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border)}
+  .main-head .who{flex:1}
+  .main-head .who .n{font-weight:600}
+  .main-head .who .s{font-size:12px;color:var(--muted)}
+  .pilot{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--border);border-radius:20px;padding:6px 12px;font-size:13px;font-weight:600}
+  .switch{position:relative;width:38px;height:20px;flex-shrink:0}
+  .switch input{opacity:0;width:0;height:0}
+  .slider{position:absolute;cursor:pointer;inset:0;background:#ccc;border-radius:20px;transition:.2s}
+  .slider:before{content:"";position:absolute;height:14px;width:14px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+  input:checked + .slider{background:var(--green)}
+  input:checked + .slider:before{transform:translateX(18px)}
+  .btn-take{background:#fff;border:1px solid var(--green);color:var(--green-dark);border-radius:20px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer}
+  .btn-take:hover{background:#e8f6f1}
+  .msgs{flex:1;overflow-y:auto;padding:20px 8%;display:flex;flex-direction:column;gap:6px;background-image:radial-gradient(#d5cfc4 0.6px,transparent 0.6px);background-size:22px 22px}
+  .bubble{max-width:70%;padding:8px 12px;border-radius:8px;font-size:14px;line-height:1.45;box-shadow:0 1px 1px rgba(0,0,0,.08);position:relative;white-space:pre-line}
+  .in{background:#fff;align-self:flex-start;border-top-left-radius:0}
+  .out{background:var(--out);align-self:flex-end;border-top-right-radius:0}
+  .meta{display:block;font-size:11px;color:var(--muted);text-align:right;margin-top:4px}
+  .by-ai{font-size:10px;font-weight:700;color:#008069;letter-spacing:.3px}
+  .by-human{font-size:10px;font-weight:700;color:#54656f;letter-spacing:.3px}
+  .draft{background:var(--amber);border:1px dashed #d9b940;align-self:flex-end;max-width:70%;padding:10px 12px;border-radius:8px;font-size:14px;line-height:1.45}
+  .draft .d-label{font-size:11px;font-weight:700;color:#8a6d00;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+  .draft .d-actions{display:flex;gap:8px;margin-top:10px}
+  .draft button{border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer}
+  .d-ok{background:var(--green);color:#fff}
+  .d-edit{background:#fff;color:var(--text);border:1px solid #d9b940 !important}
+  .d-no{background:transparent;color:#8a6d00}
+  .composer{background:var(--panel);padding:10px 16px;display:flex;gap:10px;align-items:center}
+  .composer input{flex:1;border:none;border-radius:8px;padding:11px 14px;font-size:14px;outline:none;background:#fff}
+  .composer .send{background:var(--green);border:none;color:#fff;width:42px;height:42px;border-radius:50%;font-size:18px;cursor:pointer;flex-shrink:0}
+  .sysnote{align-self:center;background:#fdf3d8;color:#6c5a11;font-size:12px;padding:5px 12px;border-radius:8px;box-shadow:0 1px 1px rgba(0,0,0,.06)}
+
+  /* ---------- SAĞ: YZ Yapılandırma ---------- */
+  .config{width:0;overflow:hidden;transition:width .25s;background:#fff;border-left:1px solid var(--border);display:flex;flex-direction:column}
+  .config.open{width:480px;min-width:420px}
+  .cfg-head{background:var(--green-dark);color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
+  .cfg-head h2{font-size:17px;font-weight:600;display:flex;align-items:center;gap:8px}
+  .cfg-head .close{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;line-height:1}
+  .tabs{display:flex;background:var(--panel);border-bottom:1px solid var(--border);overflow-x:auto}
+  .tabs button{flex:1;border:none;background:none;padding:12px 6px;font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
+  .tabs button.on{color:var(--green-dark);border-bottom-color:var(--green)}
+  .cfg-body{flex:1;overflow-y:auto;padding:20px}
+  .pane{display:none}
+  .pane.on{display:block}
+  .fld{margin-bottom:18px}
+  .fld label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
+  .fld .hint{font-size:12px;color:var(--muted);font-weight:400;margin-top:4px}
+  .fld input[type=text],.fld input[type=time],.fld select,.fld textarea{width:100%;border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:14px;outline:none;font-family:inherit}
+  .fld textarea{resize:vertical;min-height:90px}
+  .fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--green)}
+  .seg{display:flex;gap:8px;flex-wrap:wrap}
+  .seg button{border:1.5px solid var(--border);background:#fff;border-radius:20px;padding:8px 16px;font-size:13px;cursor:pointer}
+  .seg button.on{border-color:var(--green);background:#e8f6f1;color:var(--green-dark);font-weight:600}
+  .check{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;cursor:pointer;font-size:13.5px;line-height:1.4}
+  .check:hover{background:#fafafa}
+  .check input{margin-top:2px;accent-color:var(--green)}
+  .mode-row{display:flex;gap:0;border:1.5px solid var(--green);border-radius:8px;overflow:hidden;margin-bottom:20px}
+  .mode-row button{flex:1;border:none;background:#fff;padding:10px;font-size:13px;font-weight:600;cursor:pointer;color:var(--green-dark)}
+  .mode-row button.on{background:var(--green);color:#fff}
+  .prompt-preview{background:#f7f8fa;border:1px solid var(--border);border-radius:8px;padding:12px;font-size:12.5px;color:#3b4a54;line-height:1.55;white-space:pre-line}
+  .kb-item{display:flex;flex-direction:column;gap:6px;border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px}
+  .kb-item .q{font-weight:600;font-size:13.5px}
+  .kb-item .a{font-size:13px;color:#3b4a54}
+  .kb-item .del{align-self:flex-end;background:none;border:none;color:#c0392b;font-size:12px;cursor:pointer}
+  .add-btn{width:100%;border:1.5px dashed var(--green);background:#f2fbf8;color:var(--green-dark);border-radius:8px;padding:10px;font-size:13px;font-weight:600;cursor:pointer}
+  .save-bar{padding:14px 20px;border-top:1px solid var(--border);background:#fff;display:flex;gap:10px;align-items:center}
+  .save-bar .save{flex:1;background:var(--green);border:none;color:#fff;border-radius:8px;padding:12px;font-size:14px;font-weight:700;cursor:pointer}
+  .save-bar .save:hover{background:var(--green-dark)}
+  .saved-note{font-size:12px;color:var(--green-dark);font-weight:600;display:none}
+  /* playground */
+  .pg{border:1px solid var(--border);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;height:380px}
+  .pg-head{background:var(--panel);padding:8px 12px;font-size:12px;font-weight:600;color:var(--muted)}
+  .pg-msgs{flex:1;overflow-y:auto;padding:12px;background:var(--chatbg);display:flex;flex-direction:column;gap:6px}
+  .pg-msgs .bubble{max-width:85%;font-size:13px}
+  .pg-in{display:flex;gap:8px;padding:8px;background:var(--panel)}
+  .pg-in input{flex:1;border:none;border-radius:8px;padding:9px 12px;font-size:13px;outline:none}
+  .pg-in button{background:var(--green);border:none;color:#fff;border-radius:8px;padding:0 16px;font-weight:700;cursor:pointer}
+  .typing{font-size:12px;color:var(--muted);font-style:italic}
+  /* time rows */
+  .times{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  /* mobil */
+  .back{display:none;background:none;border:none;font-size:20px;cursor:pointer;color:var(--green-dark)}
+  @media(max-width:900px){
+    .sidebar{width:100%;min-width:0}
+    .main{display:none}
+    .config.open{position:fixed;inset:0;width:100%;min-width:0;z-index:50}
+    body.chat-open .sidebar{display:none}
+    body.chat-open .main{display:flex}
+    .back{display:block}
+    .msgs{padding:16px 4%}
+    .bubble,.draft{max-width:88%}
+    .pilot span.pl-t{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SOL -->
+  <aside class="sidebar">
+    <div class="sb-head">
+      <div class="me"><div class="avatar">A</div><span>Asistan Paneli</span></div>
+      <button class="btn-ai" onclick="toggleConfig(true)">⚙️ YZ Ayarları</button>
+    </div>
+    <div class="search"><input placeholder="Aratın veya yeni sohbet başlatın"></div>
+    <div class="chats" id="chatList"></div>
+  </aside>
+
+  <!-- ORTA -->
+  <section class="main">
+    <div class="main-head">
+      <button class="back" onclick="closeChat()">←</button>
+      <div class="avatar" id="chAvatar">M</div>
+      <div class="who"><div class="n" id="chName">—</div><div class="s" id="chSub">çevrimiçi</div></div>
+      <div class="pilot"><span class="pl-t">Otomatik pilot</span>
+        <label class="switch"><input type="checkbox" id="pilotSw" checked onchange="pilotChanged()"><span class="slider"></span></label>
+      </div>
+      <button class="btn-take" onclick="takeOver()">Devral</button>
+    </div>
+    <div class="msgs" id="msgs"></div>
+    <div class="composer">
+      <input id="composerIn" placeholder="Bir mesaj yazın (insan olarak)" onkeydown="if(event.key==='Enter')sendHuman()">
+      <button class="send" onclick="sendHuman()">➤</button>
+    </div>
+  </section>
+
+  <!-- SAĞ: YZ YAPILANDIRMA -->
+  <aside class="config" id="cfg">
+    <div class="cfg-head">
+      <h2>🤖 YZ Yapılandırma</h2>
+      <button class="close" onclick="toggleConfig(false)">×</button>
+    </div>
+    <div class="tabs">
+      <button class="on" onclick="tab(this,'p1')">Kişilik</button>
+      <button onclick="tab(this,'p2')">Kurallar</button>
+      <button onclick="tab(this,'p3')">Bilgi Tabanı</button>
+      <button onclick="tab(this,'p4')">Mesai</button>
+      <button onclick="tab(this,'p5')">Filtreler</button>
+      <button onclick="tab(this,'p7')">Beyin</button>
+      <button onclick="tab(this,'p6')">Test Alanı</button>
+    </div>
+    <div class="cfg-body">
+
+      <!-- KİŞİLİK -->
+      <div class="pane on" id="p1">
+        <div class="mode-row">
+          <button class="on" id="mSimple" onclick="setMode('simple')">Basit Mod</button>
+          <button id="mAdv" onclick="setMode('adv')">Gelişmiş Mod</button>
+        </div>
+        <div id="simplePane">
+          <div class="fld"><label>Asistanın adı</label><input type="text" id="aName" value="Elif" oninput="buildPrompt()"></div>
+          <div class="fld"><label>İşletme / kişi tanımı</label><input type="text" id="aBiz" value="Psikosanat — Eray Hacıosmanoğlu (Aile Danışmanı, Toplum Bilimci): Öze Dönüş travma kampları ve eğitim programları" oninput="buildPrompt()">
+            <div class="hint">Asistan kimin adına konuşuyor? Tek cümle yeter.</div></div>
+          <div class="fld"><label>Konuşma tonu</label>
+            <div class="seg" id="tone">
+              <button class="on" onclick="seg(this);buildPrompt()">Samimi</button>
+              <button onclick="seg(this);buildPrompt()">Profesyonel</button>
+              <button onclick="seg(this);buildPrompt()">Kısa ve net</button>
+            </div></div>
+          <div class="fld"><label>Emoji kullanımı</label>
+            <div class="seg" id="emoji">
+              <button onclick="seg(this);buildPrompt()">Hiç</button>
+              <button class="on" onclick="seg(this);buildPrompt()">Az</button>
+              <button onclick="seg(this);buildPrompt()">Bol</button>
+            </div></div>
+          <div class="fld"><label>Cevap uzunluğu</label>
+            <div class="seg" id="len">
+              <button class="on" onclick="seg(this);buildPrompt()">Kısa (1-2 cümle)</button>
+              <button onclick="seg(this);buildPrompt()">Orta</button>
+              <button onclick="seg(this);buildPrompt()">Detaylı</button>
+            </div></div>
+          <div class="fld"><label>Üretilen sistem promptu (önizleme)</label>
+            <div class="prompt-preview" id="promptPrev"></div>
+            <div class="hint">Bu metin seçimlerinden otomatik derlenir. Elle düzenlemek için Gelişmiş Mod'a geç.</div></div>
+        </div>
+        <div id="advPane" style="display:none">
+          <div class="fld"><label>Sistem promptu (ham)</label>
+            <textarea id="rawPrompt" style="min-height:260px"></textarea>
+            <div class="hint">⚠️ Buraya yazılan her şey asistanın anayasasıdır. Basit Mod'a dönersen bu metin korunur ama seçimler üzerine yazar.</div></div>
+        </div>
+      </div>
+
+      <!-- KURALLAR -->
+      <div class="pane" id="p2">
+        <div class="fld"><label>Kırmızı çizgiler</label>
+          <label class="check"><input type="checkbox" checked> ASLA terapi, teşhis veya psikolojik tavsiye verme — "bu Eray Bey'in alanı" de, görüşme öner</label>
+          <label class="check"><input type="checkbox" checked> Kriz sinyali (kendine zarar, akut bunalım) → derhal Eray Bey'e devret + ACİL bildirim</label>
+          <label class="check"><input type="checkbox" checked> İndirim pazarlığı yapma — %50 kampanya ve 24 saat koşulunu açıkla</label>
+          <label class="check"><input type="checkbox" checked> İade/ücret istisna kararı verme — kuralı hatırlat, kararı Eray Bey'e bırak</label>
+          <label class="check"><input type="checkbox" checked> Danışan mahremiyeti: kimseye başka katılımcının bilgisini verme</label>
+        </div>
+        <div class="fld"><label>İnsana devretme koşulları</label>
+          <label class="check"><input type="checkbox" checked> Kişi "Eray Bey'le görüşmek istiyorum" derse</label>
+          <label class="check"><input type="checkbox" checked> Aynı soru 2 kez cevaplanamadıysa</label>
+          <label class="check"><input type="checkbox" checked> İade / ücret istisnası / kişisel travma anlatımı derinleşirse</label>
+        </div>
+        <div class="fld"><label>Devirde bildirim gidecek numara</label>
+          <input type="text" value="+90 5XX XXX XX XX (Eray Bey'in numarası)">
+          <div class="hint">YZ devrettiğinde bu numaraya WhatsApp bildirimi düşer.</div></div>
+        <div class="fld"><label>Serbest kurallar (her satır bir kural)</label>
+          <textarea placeholder="Örn: ...">IBAN'ı yalnızca kayıt olmak istediğini net söyleyen kişiye ver; fiyat soran herkese ilk mesajda IBAN atma.
+Dekont gelince teşekkür et, kimlik no + açık adres + online/yüz yüze tercihini iste, ardından "kaydınız tamamlandı, WhatsApp grubuna ekleneceksiniz" bilgisi ver.</textarea></div>
+      </div>
+
+      <!-- BİLGİ TABANI -->
+      <div class="pane" id="p3">
+        <div class="hint" style="margin-bottom:14px">Asistanın ezbere bileceği bilgiler. Soru-cevap olarak ekle; asistan bunları kendi cümleleriyle kullanır.</div>
+        <div id="kbList">
+          <div class="kb-item"><div class="q">Kamp ne zaman ve nerede?</div><div class="a">10-11-12 Temmuz (Cuma–Pazar), Yalova / Çınarcık / Esenköy. Gelemeyenler eğitim oturumlarına Zoom'dan canlı katılabilir.</div><button class="del" onclick="this.parentElement.remove()">Sil</button></div>
+          <div class="kb-item"><div class="q">Ücret ne kadar?</div><div class="a">Kamp + eğitim + etkinlik: 28.000 TL yerine %50 indirimle 13.950 TL. İndirim için başvurudan itibaren 24 saat içinde kayıt tamamlanmalı. Başlangıca 7 gün ve daha az kala iade yapılmaz.</div><button class="del" onclick="this.parentElement.remove()">Sil</button></div>
+          <div class="kb-item"><div class="q">Kayıt nasıl yapılır?</div><div class="a">Ödeme: Eray Hacıosmanoğlu — Garanti — TR65 0006 2000 5310 0006 6967 83, açıklama "Konaklama - Ad Soyad". Sonra dekont + kimlik no + açık adres + online/yüz yüze tercihi WhatsApp'tan iletilir. Kayıt olan, geçici WhatsApp grubuna eklenir.</div><button class="del" onclick="this.parentElement.remove()">Sil</button></div>
+          <div class="kb-item"><div class="q">Konaklama nasıl?</div><div class="a">Deniz manzaralı, çevresi kapalı özel bahçede kişiye özel Decathlon 3 kişilik geniş çadır. Şişme yatak, mat, uyku tulumu, yastık, çadır lambası hazır.</div><button class="del" onclick="this.parentElement.remove()">Sil</button></div>
+          <div class="kb-item"><div class="q">Yemekler dahil mi?</div><div class="a">Kahvaltı ve gün içi ikramlar bizden. Öğle/akşam yemekleri kampa 3 dk mesafedeki Esenköy Limanı'nda uygun fiyatlı restoranlarda yenir.</div><button class="del" onclick="this.parentElement.remove()">Sil</button></div>
+          <div class="kb-item"><div class="q">Nasıl ulaşırım?</div><div class="a">İstanbul'dan ~1,5 saat. İDO ve Turyol'un Esenköy seferleri var; Yalova Otogarı'ndan Esenköy minibüsüyle ~30 dk. Detaylı konum kayıt sonrası grupta paylaşılır.</div><button class="del" onclick="this.parentElement.remove()">Sil</button></div>
+          <div class="kb-item"><div class="q">Kendi hikâyemle bireysel çalışma yapılır mı?</div><div class="a">Pazar uygulamalarında herkes gözlemci/temsilci olabilir. Bireysel travma çalışması ise önceden başvuran danışanlardan seçilir — kendi hikâyen için AYRICA kayıt gerekir.</div><button class="del" onclick="this.parentElement.remove()">Sil</button></div>
+        </div>
+        <button class="add-btn" onclick="addKb()">+ Yeni bilgi ekle</button>
+      </div>
+
+      <!-- MESAİ -->
+      <div class="pane" id="p4">
+        <div class="fld"><label>YZ hangi saatlerde cevap versin?</label>
+          <div class="seg" id="hours">
+            <button class="on" onclick="seg(this)">7/24 (her zaman)</button>
+            <button onclick="seg(this)">Sadece mesai dışı</button>
+            <button onclick="seg(this)">Belirli saatler</button>
+          </div></div>
+        <div class="fld"><label>Mesai saatleri</label>
+          <div class="times"><input type="time" value="09:00"><input type="time" value="18:30"></div></div>
+        <div class="fld"><label>Mesai dışı karşılama (farklı olsun mu?)</label>
+          <textarea>Merhaba! 😊 Şu an görüşme saatlerimiz dışındayız ama ben Elif, kamp ve kayıt konularında size yine de yardımcı olabilirim. Eray Bey'e iletilmesi gereken konuları sabah ilk iş aktarıyorum.</textarea></div>
+        <div class="fld"><label>İnsan hissi</label>
+          <label class="check"><input type="checkbox" checked> "Yazıyor..." göstergesi + 2-5 saniye doğal gecikme ile cevapla</label>
+        </div>
+      </div>
+
+      <!-- FİLTRELER -->
+      <div class="pane" id="p5">
+        <div class="fld"><label>Cevap modu</label>
+          <div class="seg" id="approveMode" style="flex-direction:column;align-items:stretch">
+            <button class="on" onclick="seg(this)">🟡 Onaylı gönder — YZ cevabı taslak olarak bekletir, sen onaylayınca gider (güvenli başlangıç)</button>
+            <button onclick="seg(this)">🟢 Direkt gönder — YZ beklemeden cevaplar</button>
+          </div></div>
+        <div class="fld"><label>Kimlere cevap versin?</label>
+          <label class="check"><input type="checkbox" checked> Grup mesajlarını tamamen yoksay</label>
+          <label class="check"><input type="checkbox"> Sadece rehberde kayıtlı kişilere cevap ver</label>
+          <label class="check"><input type="checkbox" checked> İlk kez yazanlara "Ben yapay zekâ asistanıyım" diye kendini tanıtsın</label>
+        </div>
+        <div class="fld"><label>Kara liste (bu numaralara asla cevap verme)</label>
+          <textarea placeholder="Her satıra bir numara">+90 555 000 00 00</textarea></div>
+      </div>
+
+      <!-- BEYİN (YZ SAĞLAYICI) -->
+      <div class="pane" id="p7">
+        <div class="fld"><label>Kullanım şekli</label>
+          <div class="seg" id="pkg" style="flex-direction:column;align-items:stretch">
+            <button class="on" onclick="seg(this);pkgChanged('byok')">🔑 Kendi anahtarım — YZ maliyetini kendin ödersin, sadece küçük panel ücreti (meraklısına)</button>
+            <button onclick="seg(this);pkgChanged('managed')">📦 Her şey dahil paket — anahtar bizden, değişikliklerin uzman onayıyla yayına alınır (aylık abonelik)</button>
+          </div></div>
+
+        <!-- KENDİ ANAHTARIM -->
+        <div id="byokPane">
+        <div class="hint" style="margin-bottom:14px">Asistanın hangi yapay zekâyla düşüneceğini seç, kendi API anahtarını (token) ekle. Her kullanıcı kendi beynini takar.</div>
+        <div class="fld"><label>YZ sağlayıcısı</label>
+          <div class="seg" id="brain" style="flex-direction:column;align-items:stretch">
+            <button class="on" onclick="seg(this);brainChanged('claude')">🟣 Claude (Anthropic) — ÖNERİLEN: kural takibi ve araç kullanımı en güvenilir</button>
+            <button onclick="seg(this);brainChanged('openai')">🟢 OpenAI (GPT)</button>
+            <button onclick="seg(this);brainChanged('nim')">🟩 NVIDIA NIM</button>
+            <button onclick="seg(this);brainChanged('gemini')">🔵 Google Gemini</button>
+          </div></div>
+        <div class="fld"><label>Adım adım kurulum</label>
+          <div class="prompt-preview" id="brainSteps" style="background:#f2fbf8;border-color:#bfe8db"></div>
+          <div class="hint">Takıldığın adımda "Yardım iste" ile bize yaz, beraber yapalım.</div></div>
+        <div class="fld"><label>API anahtarı (token)</label>
+          <div style="display:flex;gap:8px">
+            <input type="password" id="brainKey" placeholder="sk-..." style="flex:1;border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:14px;outline:none">
+            <button class="btn-take" style="flex-shrink:0" onclick="const k=document.getElementById('brainKey');k.type=k.type==='password'?'text':'password'">👁</button>
+          </div>
+          <div class="hint">🔒 Anahtar şifrelenerek saklanır, yalnızca senin asistanın kullanır. Kimseyle paylaşılmaz.</div></div>
+        <div class="fld"><label>Model</label>
+          <select id="brainModel"></select>
+          <div class="hint" id="brainHint"></div></div>
+        <div class="fld">
+          <button class="add-btn" id="brainTest" onclick="testBrain()">⚡ Bağlantıyı Test Et</button>
+          <div class="hint" id="brainTestResult" style="margin-top:8px"></div>
+        </div>
+        <div class="fld"><label>Yedek beyin (opsiyonel)</label>
+          <label class="check"><input type="checkbox" checked> Ana beyin hata verirse müşteriyi bekletme: "en kısa sürede döneceğiz" de ve bana bildirim gönder</label>
+          <div class="hint">İleride: ikinci bir sağlayıcı anahtarı eklenirse otomatik yedeğe geçiş.</div></div>
+        </div><!-- /byokPane -->
+
+        <!-- HER ŞEY DAHİL PAKET -->
+        <div id="managedPane" style="display:none">
+          <div class="prompt-preview" style="background:#f2fbf8;border-color:#bfe8db;margin-bottom:16px">📦 Bu pakette YZ anahtarı, model seçimi ve teknik ayarlar ZekaHub tarafından yönetilir — sen hiçbir teknik işlemle uğraşmazsın.
+
+Kişilik, kural ve bilgi tabanı değişikliklerini yine sen yaparsın; "Onaya Gönder" dersin, uzmanımız kontrol eder ve genellikle aynı gün yayına alır. Böylece asistanın hiçbir zaman hatalı bir ayarla müşteri karşısına çıkmaz.
+
+Gerektiğinde biz de senin adına iyileştirme yaparız — her değişiklikte sana WhatsApp bildirimi gelir, istemezsen geri alınır.</div>
+          <div class="fld"><label>Son değişiklik taleplerin</label>
+            <div class="kb-item"><div class="q">Bilgi Tabanı: 2 yeni SSS eklendi</div><div class="a">✅ Onaylandı ve yayında — bugün 11:20 (uzman notu: fiyat cevabına "24 saat indirim koşulu" vurgusu eklendi)</div></div>
+            <div class="kb-item"><div class="q">Kurallar: pazarlık kuralı güncellendi</div><div class="a">⏳ Onay bekliyor — bugün 14:05'te gönderildi</div></div>
+            <div class="kb-item"><div class="q">ZekaHub iyileştirmesi: mesai dışı karşılama metni</div><div class="a">🔔 Bilgilendirme — dün uygulandı, "geri al" hakkın 7 gün geçerli</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TEST ALANI -->
+      <div class="pane" id="p6">
+        <div class="hint" style="margin-bottom:12px">Canlıya almadan asistanı burada dene. Müşteri gibi yaz, ayarlarına göre nasıl cevap vereceğini gör.</div>
+        <div class="pg">
+          <div class="pg-head">🧪 Deneme sohbeti — gerçek müşteriye HİÇBİR ŞEY gitmez</div>
+          <div class="pg-msgs" id="pgMsgs">
+            <div class="bubble out">Merhaba! Ben Elif, Psikosanat'ın dijital asistanıyım 😊 Öze Dönüş Kampı ve eğitimlerimiz hakkında size nasıl yardımcı olabilirim?<span class="meta"><span class="by-ai">YZ · TEST</span></span></div>
+          </div>
+          <div class="pg-in">
+            <input id="pgIn" placeholder="Katılımcı gibi yazın... (örn: kamp ücreti ne kadar?)" onkeydown="if(event.key==='Enter')pgSend()">
+            <button onclick="pgSend()">Dene</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="save-bar">
+      <span class="saved-note" id="savedNote">✓ Kaydedildi — asistan yeni ayarlarla konuşuyor</span>
+      <button class="save" onclick="saveCfg()">Ayarları Kaydet ve Yayınla</button>
+    </div>
+  </aside>
+</div>
+
+<script>
+/* ---------- MOCK VERİ ---------- */
+const chats = [
+  {id:1, name:"Selin Yıldız", init:"SY", time:"10:42", status:"ai", pilot:true,
+   preview:"YZ: İndirim için başvurudan itibaren 24 saat içinde...",
+   msgs:[
+    {t:"in", x:"Merhaba, Öze Dönüş kampını Instagram'da gördüm. Bilgi alabilir miyim?", m:"10:31"},
+    {t:"out", by:"ai", x:"Merhaba Selin Hanım, hoş geldiniz! 😊 Ben Elif, Psikosanat'ın dijital asistanıyım.\nÖze Dönüş: Geçmişin Travmalarından Kurtulmak Kampı 10-11-12 Temmuz'da (Cuma–Pazar) Yalova / Çınarcık / Esenköy'de gerçekleşecek. Eğitim + kamp konaklaması + tüm etkinlikler dahil; gelemeyenler eğitimlere Zoom'dan canlı katılabiliyor.\nÜcret: 28.000 TL yerine %50 indirimle 13.950 TL. Yüz yüze mi, online mı düşünürsünüz?", m:"10:32"},
+    {t:"in", x:"Çok iyiymiş. İndirim ne zamana kadar geçerli?", m:"10:40"},
+    {t:"out", by:"ai", x:"İndirimden yararlanmak için başvurudan itibaren 24 saat içinde kaydın tamamlanması gerekiyor. Dilerseniz kayıt adımlarını hemen göndereyim, yerinizi ayıralım? 😊", m:"10:42"},
+   ]},
+  {id:2, name:"Murat Demir", init:"MD", time:"09:58", status:"wait", pilot:true,
+   preview:"⏳ YZ cevabı onay bekliyor...",
+   msgs:[
+    {t:"in", x:"Pazar günkü uygulamalarda kendi hikâyemle ilgili çalışma yapılmasını istiyorum. Mümkün mü?", m:"09:55"},
+    {t:"draft", x:"Murat Bey merhaba, bu çok değerli bir adım. 🙏 Pazar günü tüm katılımcılar uygulamalarda gözlemci ve temsilci olarak yer alabiliyor. Bireysel travma çalışması yapılacak kişiler ise önceden başvuran danışanlarımız arasından seçiliyor — kendi hikâyenizle özel çalışma için ayrıca kayıt oluşturmak gerekiyor. Dilerseniz başvurunuzu hemen alayım, Eray Bey değerlendirip size dönsün?", m:"09:58"},
+   ]},
+  {id:3, name:"Zeynep Arslan", init:"ZA", time:"Dün", status:"human", pilot:false,
+   preview:"Siz: kaydınızı bir sonraki kampa devredebiliriz ✓",
+   msgs:[
+    {t:"in", x:"Kayıt olmuştum ama işlerim çıktı, kampa gelemeyeceğim. Ücret iadesi alabilir miyim?", m:"Dün 16:02"},
+    {t:"out", by:"ai", x:"Çok üzüldüm Zeynep Hanım 🙏 Kayıt koşullarımızda eğitim başlangıcına 7 gün veya daha az kala iade yapılamıyor. Yine de durumunuzu hemen Eray Bey'e iletiyorum — bugün içinde size dönüş yapılacak.", m:"Dün 16:03"},
+    {t:"sys", x:"🔔 YZ sohbeti insana devretti (kural: iade/ücret kararı) — Eray Bey'e bildirim gönderildi"},
+    {t:"out", by:"human", x:"Zeynep Hanım merhaba, ben Eray. Üzülmeyin — dilerseniz kaydınızı bir sonraki kampa devredebiliriz, hakkınız yanmasın ✓", m:"Dün 17:20"},
+   ]},
+  {id:4, name:"+90 532 111 22 33", init:"?", time:"Dün", status:"ai", pilot:true,
+   preview:"YZ: İDO ve Turyol'un Esenköy seferleri var...",
+   msgs:[
+    {t:"in", x:"selam kamp tam olarak nerde, istanbuldan nasıl gelinir", m:"Dün 13:11"},
+    {t:"out", by:"ai", x:"Merhaba! Kamp Yalova / Çınarcık / Esenköy'de — İstanbul'dan yaklaşık 1,5 saat. İDO ve Turyol'un Esenköy seferleri var; Yalova Otogarı'na gelirseniz Esenköy minibüsleriyle ~30 dakikada ulaşırsınız. Detaylı konum, kayıt sonrası WhatsApp grubunda paylaşılıyor. 😊", m:"Dün 13:11"},
+   ]},
+];
+let cur = chats[0];
+
+/* ---------- SOHBET LİSTESİ ---------- */
+function renderList(){
+  const el = document.getElementById("chatList");
+  el.innerHTML = "";
+  chats.forEach(c=>{
+    const d = document.createElement("div");
+    d.className = "chat-item" + (c.id===cur.id ? " active":"");
+    const tag = c.status==="ai" ? '<span class="tag ai">🤖 YZ</span>'
+             : c.status==="wait" ? '<span class="tag wait">⏳ Onay bekliyor</span>'
+             : '<span class="tag human">👤 İnsan</span>';
+    d.innerHTML = `<div class="avatar">${c.init}</div>
+      <div class="info">
+        <div class="row1"><span class="name">${c.name}</span><span class="time">${c.time}</span></div>
+        <div class="row2"><span class="preview">${c.preview}</span>${tag}</div>
+      </div>`;
+    d.onclick = ()=>{ cur=c; document.body.classList.add("chat-open"); renderList(); renderChat(); };
+    el.appendChild(d);
+  });
+}
+
+/* ---------- SOHBET GÖRÜNÜMÜ ---------- */
+function renderChat(){
+  document.getElementById("chName").textContent = cur.name;
+  document.getElementById("chAvatar").textContent = cur.init;
+  document.getElementById("pilotSw").checked = cur.pilot;
+  document.getElementById("chSub").textContent = cur.pilot ? "otomatik pilot açık · YZ cevaplıyor" : "YZ kapalı · sen cevaplıyorsun";
+  const m = document.getElementById("msgs");
+  m.innerHTML = "";
+  cur.msgs.forEach(x=>{
+    if(x.t==="sys"){ const s=document.createElement("div"); s.className="sysnote"; s.textContent=x.x; m.appendChild(s); return; }
+    if(x.t==="draft"){
+      const d=document.createElement("div"); d.className="draft";
+      d.innerHTML = `<div class="d-label">⏳ YZ CEVAP TASLAĞI — onayını bekliyor</div>${x.x}
+        <div class="d-actions"><button class="d-ok">✓ Onayla ve Gönder</button><button class="d-edit">✎ Düzenle</button><button class="d-no">Sil</button></div>`;
+      d.querySelector(".d-ok").onclick = ()=>{ x.t="out"; x.by="ai"; cur.status="ai"; cur.preview="YZ: "+x.x.slice(0,40)+"..."; renderList(); renderChat(); };
+      d.querySelector(".d-no").onclick = ()=>{ cur.msgs = cur.msgs.filter(v=>v!==x); cur.status="human"; renderList(); renderChat(); };
+      d.querySelector(".d-edit").onclick = ()=>{ document.getElementById("composerIn").value = x.x; cur.msgs = cur.msgs.filter(v=>v!==x); renderChat(); };
+      m.appendChild(d); return;
+    }
+    const b=document.createElement("div");
+    b.className = "bubble " + (x.t==="in"?"in":"out");
+    const who = x.t==="out" ? (x.by==="ai" ? '<span class="by-ai">🤖 YZ</span> · ' : '<span class="by-human">👤 SEN</span> · ') : "";
+    b.innerHTML = x.x + `<span class="meta">${who}${x.m||""}</span>`;
+    m.appendChild(b);
+  });
+  m.scrollTop = m.scrollHeight;
+}
+function closeChat(){ document.body.classList.remove("chat-open"); }
+function pilotChanged(){
+  cur.pilot = document.getElementById("pilotSw").checked;
+  cur.status = cur.pilot ? "ai" : "human";
+  renderList(); renderChat();
+}
+function takeOver(){
+  cur.pilot = false; cur.status="human";
+  cur.msgs.push({t:"sys", x:"🔔 Sohbeti devraldın — YZ bu sohbete artık karışmıyor. Anahtarı açınca geri döner."});
+  renderList(); renderChat();
+}
+function sendHuman(){
+  const i=document.getElementById("composerIn");
+  if(!i.value.trim())return;
+  cur.msgs.push({t:"out", by:"human", x:i.value.trim(), m:"şimdi"});
+  cur.preview = "Siz: " + i.value.trim().slice(0,40);
+  i.value="";
+  renderList(); renderChat();
+}
+
+/* ---------- YAPILANDIRMA ---------- */
+function toggleConfig(open){ document.getElementById("cfg").classList.toggle("open", open); }
+function tab(btn,id){
+  document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("on"));
+  btn.classList.add("on");
+  document.querySelectorAll(".pane").forEach(p=>p.classList.remove("on"));
+  document.getElementById(id).classList.add("on");
+}
+function seg(btn){
+  [...btn.parentElement.children].forEach(b=>b.classList.remove("on"));
+  btn.classList.add("on");
+}
+function setMode(m){
+  document.getElementById("mSimple").classList.toggle("on", m==="simple");
+  document.getElementById("mAdv").classList.toggle("on", m==="adv");
+  document.getElementById("simplePane").style.display = m==="simple"?"block":"none";
+  document.getElementById("advPane").style.display = m==="adv"?"block":"none";
+  if(m==="adv") document.getElementById("rawPrompt").value = document.getElementById("promptPrev").textContent;
+}
+function segVal(id){ return document.querySelector("#"+id+" button.on").textContent; }
+function buildPrompt(){
+  const name=document.getElementById("aName").value, biz=document.getElementById("aBiz").value;
+  const tone=segVal("tone"), emoji=segVal("emoji"), len=segVal("len");
+  const p = `Sen ${name} adında bir WhatsApp asistanısın. ${biz} adına müşterilerle yazışıyorsun.
+
+TON: ${tone} bir dille konuş. Emoji kullanımı: ${emoji.toLowerCase()}. Cevap uzunluğu: ${len.toLowerCase()}.
+
+GÖREVLERİN: Kamp/eğitim sorularını bilgi tabanından cevapla. Kayıt sürecini yürüt (ödeme adımları + dekont + kimlik no + adres + online/yüz yüze tercihi). Bireysel çalışma başvurularını kaydet ve Eray Bey'e ilet.
+
+SINIRLAR: Kurallar sekmesindeki kırmızı çizgilere kesin uy. ASLA terapi/teşhis/psikolojik tavsiye verme — "bu Eray Bey'in alanı" de, görüşme öner. Kriz sinyalinde derhal insana devret. Bilmediğin konuda uydurma — "netleştirip döneceğiz" de. Kendini ilk mesajda yapay zekâ olarak tanıt.`;
+  document.getElementById("promptPrev").textContent = p;
+}
+function addKb(){
+  const q = prompt("Soru (müşteri ne soruyor?)"); if(!q) return;
+  const a = prompt("Cevap (asistan ne bilsin?)"); if(!a) return;
+  const d = document.createElement("div"); d.className="kb-item";
+  d.innerHTML = `<div class="q">${q}</div><div class="a">${a}</div><button class="del" onclick="this.parentElement.remove()">Sil</button>`;
+  document.getElementById("kbList").appendChild(d);
+}
+function saveCfg(){
+  const n=document.getElementById("savedNote");
+  n.textContent = pkgMode==="managed"
+    ? "✓ Onaya gönderildi — uzmanımız kontrol edip yayınlayacak (genellikle aynı gün)"
+    : "✓ Kaydedildi — asistan yeni ayarlarla konuşuyor";
+  n.style.display="inline";
+  setTimeout(()=>n.style.display="none", 4000);
+}
+
+/* ---------- BEYİN ---------- */
+const brains = {
+  claude: {models:["claude-sonnet-5 (önerilen — hız/kalite dengesi)","claude-fable-5 (en zeki)","claude-haiku-4-5 (en ucuz/hızlı)"],
+    hint:"Kural takibi ve devretme kararlarında en tutarlı beyin. Varsayılan bu.",
+    steps:"1️⃣ Tarayıcıdan console.anthropic.com adresine gir, e-postanla hesap aç.\n2️⃣ Sol menü → Billing → kart ekle ve 5$ kredi yükle (başlangıç için yeter).\n3️⃣ Sol menü → API Keys → \"Create Key\" → bir isim ver (örn. whatsapp-asistan).\n4️⃣ \"sk-ant-\" ile başlayan anahtarı KOPYALA (bir daha gösterilmez!).\n5️⃣ Aşağıdaki kutuya yapıştır → \"Bağlantıyı Test Et\" → yeşil onayı gör."},
+  openai: {models:["gpt-5.x (güncel listeden seçilecek)"],
+    hint:"⚠️ Jarvis dersi: OpenAI beyni bazen 'yaptım' deyip aracı gerçekten çağırmıyor (randevu yazmadan yazdım diyebilir). Kritik işlemler için çift kontrol katmanı ekleyeceğiz.",
+    steps:"1️⃣ platform.openai.com adresine gir, hesap aç.\n2️⃣ Settings → Billing → kart ekle, 5$ kredi yükle.\n3️⃣ API Keys → \"Create new secret key\".\n4️⃣ \"sk-\" ile başlayan anahtarı kopyala.\n5️⃣ Aşağıya yapıştır → \"Bağlantıyı Test Et\"."},
+  nim: {models:["kimi-k2.6","llama-3.x-nemotron","diğer NIM modelleri..."],
+    hint:"⚠️ Jarvis dersi: NIM'de temperature=0.6 SABİT olmalı, yoksa bozuk/anlamsız çıktı üretiyor. Bu ayarı panel otomatik uygular, kullanıcıya sormaz.",
+    steps:"1️⃣ build.nvidia.com adresine gir, ücretsiz hesap aç.\n2️⃣ Sağ üst → profil → API Keys → \"Generate Key\".\n3️⃣ \"nvapi-\" ile başlayan anahtarı kopyala.\n4️⃣ Aşağıya yapıştır → \"Bağlantıyı Test Et\".\n💡 Ücretsiz kotası vardır — denemek için para gerekmez."},
+  gemini: {models:["gemini-2.x-pro","gemini-2.x-flash (ucuz/hızlı)"],
+    hint:"Uzun sohbet geçmişlerinde ekonomik seçenek.",
+    steps:"1️⃣ aistudio.google.com adresine Google hesabınla gir.\n2️⃣ Sol üst → \"Get API key\" → \"Create API key\".\n3️⃣ \"AIza\" ile başlayan anahtarı kopyala.\n4️⃣ Aşağıya yapıştır → \"Bağlantıyı Test Et\".\n💡 Ücretsiz kotası vardır — denemek için para gerekmez."},
+};
+function brainChanged(key){
+  const b = brains[key];
+  const sel = document.getElementById("brainModel");
+  sel.innerHTML = b.models.map(m=>`<option>${m}</option>`).join("");
+  document.getElementById("brainHint").textContent = b.hint;
+  document.getElementById("brainSteps").textContent = b.steps;
+  document.getElementById("brainTestResult").textContent = "";
+}
+let pkgMode = "byok";
+function pkgChanged(m){
+  pkgMode = m;
+  document.getElementById("byokPane").style.display = m==="byok"?"block":"none";
+  document.getElementById("managedPane").style.display = m==="managed"?"block":"none";
+  document.querySelector(".save-bar .save").textContent = m==="managed" ? "Değişiklikleri Onaya Gönder" : "Ayarları Kaydet ve Yayınla";
+}
+function testBrain(){
+  const r = document.getElementById("brainTestResult");
+  const key = document.getElementById("brainKey").value.trim();
+  if(!key){ r.innerHTML = '<span style="color:#c0392b;font-weight:600">✗ Önce API anahtarını yapıştır.</span>'; return; }
+  r.textContent = "Bağlanıyor...";
+  setTimeout(()=>{
+    const m = document.getElementById("brainModel").value.split(" ")[0];
+    r.innerHTML = `<span style="color:var(--green-dark);font-weight:600">✓ Bağlantı başarılı — ${m} hazır. Deneme mesajı 1.2 sn'de cevaplandı.</span>`;
+  }, 1200);
+}
+
+/* ---------- TEST ALANI ---------- */
+const pgReplies = [
+  {k:["fiyat","kaç para","ücret","ne kadar"], r:"Kamp + eğitim + tüm etkinlikler: 28.000 TL yerine %50 indirimle 13.950 TL. 🙏 İndirimden yararlanmak için başvurudan itibaren 24 saat içinde kaydın tamamlanması gerekiyor. Kayıt adımlarını göndereyim mi?"},
+  {k:["kayıt","katılmak","başvur","nasıl katıl"], r:"Çok sevindim! 😊 Kayıt için ödeme dekontunuzu, kimlik numaranızı, açık adresinizi ve online/yüz yüze tercihlerinizi buradan iletmeniz yeterli. Ödeme bilgilerini göndereyim mi?"},
+  {k:["program","saat","içerik","neler var"], r:"Kamp Cuma 14.00'te eğitimle başlıyor; kamp ateşi, karaoke, havuz, vaka analizi-sinema ve Pazar günü tam gün travma örüntüleri uygulama çalışmaları var. Detaylı programı göndereyim mi? 😊"},
+  {k:["konaklama","çadır","kalacak","yatak"], r:"Konaklama deniz manzaralı, çevresi kapalı özel bahçede — kişiye özel Decathlon 3 kişilik geniş çadır. Şişme yatak, mat, uyku tulumu, yastık ve çadır lambası hazır olarak sizi bekliyor. ⛺"},
+  {k:["nerde","nerede","konum","ulaşım","nasıl gel"], r:"Kamp Yalova / Çınarcık / Esenköy'de, İstanbul'dan ~1,5 saat. İDO ve Turyol'un Esenköy seferleri var; Yalova Otogarı'ndan minibüsle ~30 dk. Detaylı konum kayıt sonrası WhatsApp grubunda paylaşılıyor."},
+  {k:["zoom","online","uzaktan"], r:"Evet! Kampa gelemeyenler eğitim oturumlarına Zoom üzerinden canlı katılabiliyor. Kayıtta 'online katılım' tercihinizi belirtmeniz yeterli. 😊"},
+  {k:["iade","gelemeyeceğim","vazgeç"], r:"Kayıt koşullarımızda eğitim başlangıcına 7 gün veya daha az kala iade yapılamıyor. Yine de durumunuzu Eray Bey'e iletiyorum — size en kısa sürede dönüş yapılacak. 🙏"},
+  {k:["bireysel","kendi hikaye","kendi hikâye","travma çalışması yap"], r:"Pazar günü tüm katılımcılar uygulamalarda gözlemci ve temsilci olabiliyor. Bireysel travma çalışması ise önceden başvuran danışanlarımız arasından seçiliyor — kendi hikâyeniz için ayrıca kayıt oluşturalım mı? Eray Bey değerlendirip dönsün."},
+  {k:["depresyon","terapi","ilaç","tavsiye","bunalım","psikolog"], r:"Bu çok kişisel ve değerli bir konu — ben yapay zekâ asistanı olarak bu alanda yorum yapmıyorum, burası Eray Bey'in uzmanlık alanı. 🙏 Dilerseniz sizin için bir ön görüşme ayarlayayım?"},
+];
+function pgSend(){
+  const i=document.getElementById("pgIn"), box=document.getElementById("pgMsgs");
+  const txt=i.value.trim(); if(!txt)return; i.value="";
+  const u=document.createElement("div"); u.className="bubble in"; u.textContent=txt; box.appendChild(u);
+  const t=document.createElement("div"); t.className="typing"; t.textContent=(document.getElementById("aName").value||"Asistan")+" yazıyor..."; box.appendChild(t);
+  box.scrollTop=box.scrollHeight;
+  const low=txt.toLowerCase();
+  const hit=pgReplies.find(p=>p.k.some(k=>low.includes(k)));
+  const reply = hit ? hit.r : "Bunu tam netleştiremedim, yanlış bilgi vermek istemem — yetkilimize sorup döneceğim. Bu arada başka bir konuda yardımcı olabilir miyim? 😊";
+  setTimeout(()=>{
+    t.remove();
+    const b=document.createElement("div"); b.className="bubble out";
+    b.innerHTML = reply + '<span class="meta"><span class="by-ai">YZ · TEST</span></span>';
+    box.appendChild(b); box.scrollTop=box.scrollHeight;
+  }, 1400);
+}
+
+/* init */
+buildPrompt(); brainChanged("claude"); renderList(); renderChat();
+</script>
+</body>
+</html>
